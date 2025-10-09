@@ -85,8 +85,8 @@ export default function Signup() {
     localStorage.setItem("currentUser", JSON.stringify(userToSave));
     setSubmitting(false);
 
-    // ✅ Always go to home page after signup
-    navigate("/");
+    // ✅ Go to dashboard; DashboardRouter will redirect based on role
+    navigate("/dashboard");
   };
 
   return (

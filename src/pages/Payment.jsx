@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { CreditCard, CheckCircle } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { useCart } from "../context/CartContext";
 
 function Payment() {
   const [item, setItem] = useState(null);
   const [method, setMethod] = useState("UPI");
   const [paid, setPaid] = useState(false);
+  const navigate = useNavigate();
+  const { cart, clearCart, total } = useCart();
 
   useEffect(() => {
     const data = localStorage.getItem("buyNowItem");
@@ -13,16 +17,41 @@ function Payment() {
 
   const handlePayment = () => {
     setPaid(true);
+    // Build order
+    const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
+    let items = [];
+    if (item) {
+      // Buy now single item
+      items = [{ ...item, quantity: 1 }];
+    } else {
+      // Fallback to cart
+      const persistedCart = JSON.parse(localStorage.getItem("cart") || "[]");
+      items = (cart && cart.length ? cart : persistedCart);
+    }
+    const total = items.reduce((s, it) => s + (it.price || 0) * (it.quantity || 1), 0);
+    const order = {
+      id: Date.now(),
+      userId: currentUser?.id || null,
+      items: items.map((it) => ({ id: it.id, name: it.name || it.title, price: it.price, quantity: it.quantity || 1, image: it.image })),
+      total,
+      paymentMethod: method,
+      status: "Placed",
+      createdAt: new Date().toISOString(),
+    };
+    const orders = JSON.parse(localStorage.getItem("orders") || "[]");
+    orders.push(order);
+    localStorage.setItem("orders", JSON.stringify(orders));
+
+    // Cleanup states
     localStorage.removeItem("buyNowItem");
-    setTimeout(() => alert("✅ Payment Successful!"), 500);
+    clearCart();
+
+    // Redirect to confirmation
+    navigate(`/order/${order.id}`);
   };
 
-  if (!item)
-    return (
-      <h2 className="text-center mt-20 text-red-600">
-        No item selected for payment.
-      </h2>
-    );
+  // If no direct buy item, allow paying for cart
+  const payingCart = !item;
 
   return (
     <div className="min-h-screen bg-[#fffaf3] flex justify-center items-center px-4">
@@ -31,21 +60,32 @@ function Payment() {
           Secure Payment
         </h1>
 
-        {/* Item Summary */}
-        <div className="flex items-center gap-4 mb-6">
-          <img
-            src={item.image}
-            alt={item.name}
-            className="w-24 h-24 rounded-xl object-cover shadow-md"
-          />
-          <div>
-            <h2 className="text-xl font-semibold">{item.name}</h2>
-            <p className="text-gray-600">{item.region}</p>
-            <p className="text-amber-700 font-bold text-lg mt-1">
-              ₹{item.price}
-            </p>
+        {/* Item/Cart Summary */}
+        {payingCart ? (
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-24 h-24 rounded-xl bg-gray-100 shadow-md" />
+            <div>
+              <h2 className="text-xl font-semibold">Paying for Cart</h2>
+              <p className="text-gray-600">Items: {cart.length}</p>
+              <p className="text-amber-700 font-bold text-lg mt-1">₹{total}</p>
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="flex items-center gap-4 mb-6">
+            <img
+              src={item.image}
+              alt={item.name}
+              className="w-24 h-24 rounded-xl object-cover shadow-md"
+            />
+            <div>
+              <h2 className="text-xl font-semibold">{item.name}</h2>
+              <p className="text-gray-600">{item.region}</p>
+              <p className="text-amber-700 font-bold text-lg mt-1">
+                ₹{item.price}
+              </p>
+            </div>
+          </div>
+        )}
 
         {/* Payment Method */}
         <label className="block font-semibold mb-2 text-gray-700">
@@ -68,7 +108,7 @@ function Payment() {
           onClick={handlePayment}
           className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg text-lg font-semibold flex justify-center items-center gap-2 transition"
         >
-          <CreditCard size={20} /> Pay ₹{item.price}
+          <CreditCard size={20} /> Pay ₹{payingCart ? total : item.price}
         </button>
 
         {/* Success Message */}

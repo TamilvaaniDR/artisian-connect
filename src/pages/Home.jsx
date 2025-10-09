@@ -1,5 +1,5 @@
 import React from "react";
-//import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import img1 from "../assets/images/10.jpeg";
 import img2 from "../assets/images/20.jpeg";
@@ -7,6 +7,7 @@ import img3 from "../assets/images/30.jpeg";
 import img4 from "../assets/images/50.jpeg";
 
 function Home() {
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-[#fffaf3] text-gray-800">
       {/* Hero Section */}
@@ -21,15 +22,35 @@ function Home() {
         </p>
 
         {/* Search Bar */}
-        <div className="w-full max-w-md flex items-center border border-amber-400 rounded-full overflow-hidden bg-white shadow-md">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            navigate("/login");
+          }}
+          className="w-full max-w-md flex items-center border border-amber-400 rounded-full overflow-hidden bg-white shadow-md"
+        >
           <input
             type="text"
             placeholder="Search Artisan, Product or Region..."
             className="flex-grow px-4 py-2 outline-none"
           />
-          <button className="bg-amber-600 text-white px-6 py-2 font-semibold hover:bg-amber-700">
+          <button type="submit" className="bg-amber-600 text-white px-6 py-2 font-semibold hover:bg-amber-700">
             Search
           </button>
+        </form>
+
+        {/* CTAs */}
+        <div className="mt-6 flex gap-4">
+          <Link to="/login">
+            <button className="px-6 py-2 rounded-lg text-white font-semibold bg-amber-600 hover:bg-amber-700">
+              Explore Crafts
+            </button>
+          </Link>
+          <Link to="/login">
+            <button className="px-6 py-2 rounded-lg border-2 border-amber-600 text-amber-700 font-semibold hover:bg-amber-50">
+              View a Sample Craft
+            </button>
+          </Link>
         </div>
       </section>
 

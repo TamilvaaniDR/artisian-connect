@@ -2,28 +2,22 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ShoppingCart, ArrowLeft, CreditCard } from "lucide-react";
 import crafts from "../data/crafts";
+import { useCart } from "../context/CartContext";
 
 function CraftDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const craft = crafts.find((item) => item.id === parseInt(id));
+  const { addToCart } = useCart();
 
   if (!craft) {
     return <h2 className="text-center text-red-600 mt-10">Craft not found!</h2>;
   }
 
-  // Add to Cart
+  // Add to Cart via context
   const handleAddToCart = () => {
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-    const exists = cart.find((item) => item.id === craft.id);
-
-    if (!exists) {
-      cart.push({ ...craft, quantity: 1 });
-      localStorage.setItem("cart", JSON.stringify(cart));
-      alert(`✅ ${craft.name} added to cart!`);
-    } else {
-      alert("🛒 Already in your cart!");
-    }
+    addToCart(craft);
+    alert(`✅ ${craft.name} added to cart!`);
   };
 
   // Buy Now

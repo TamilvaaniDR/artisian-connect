@@ -45,8 +45,8 @@ export default function Login() {
       localStorage.setItem("currentUser", JSON.stringify(found));
       setLoading(false);
 
-      // ✅ redirect to home (not dashboard)
-      navigate("/");
+      // ✅ always go to /dashboard; DashboardRouter will send to the correct role dashboard
+      navigate("/dashboard", { replace: true });
     }, 700);
   };
 

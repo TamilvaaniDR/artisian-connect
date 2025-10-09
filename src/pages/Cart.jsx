@@ -3,10 +3,8 @@ import { useCart } from "../context/CartContext";
 import { useNavigate } from "react-router-dom";
 
 function Cart() {
-  const { cart, removeFromCart, clearCart } = useCart();
+  const { cart, removeFromCart, clearCart, increment, decrement, total } = useCart();
   const navigate = useNavigate();
-
-  const total = cart.reduce((sum, item) => sum + item.price, 0);
 
   if (cart.length === 0)
     return <h2 className="text-center text-amber-700 mt-10">🛒 Your cart is empty!</h2>;
@@ -22,6 +20,12 @@ function Cart() {
             <div className="ml-4 flex-1">
               <h3 className="font-semibold text-lg">{item.name}</h3>
               <p className="text-gray-600">{item.region} • ₹{item.price}</p>
+              <div className="mt-2 flex items-center gap-3">
+                <button onClick={() => decrement(item.id)} className="px-2 py-1 bg-gray-200 rounded">-</button>
+                <span className="min-w-[24px] text-center">{item.quantity || 1}</span>
+                <button onClick={() => increment(item.id)} className="px-2 py-1 bg-gray-200 rounded">+</button>
+                <span className="ml-4 text-sm text-gray-700">Line total: ₹{(item.price || 0) * (item.quantity || 1)}</span>
+              </div>
             </div>
             <button
               onClick={() => removeFromCart(item.id)}
