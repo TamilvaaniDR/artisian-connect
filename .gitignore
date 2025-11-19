@@ -21,3 +21,7 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# backend environment and virtualenv
+backend/.env
+backend/.venv/
